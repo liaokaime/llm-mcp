@@ -1,8 +1,9 @@
 import "dotenv/config";
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { z } from "zod";
-import { askAiTool, handleAskAi } from "./tools/ask-ai.js";
+import {fileURLToPath} from "url";
+import path from "path";
+import {McpServer} from "@modelcontextprotocol/sdk/server/mcp.js";
+import {StdioServerTransport} from "@modelcontextprotocol/sdk/server/stdio.js";
+import {queryModelTool, handleQueryModel, QueryModelArgsSchema} from "./tools/query-model.js";
 
 class OpenRouterMcpServer {
   private server: McpServer;
@@ -19,13 +20,14 @@ class OpenRouterMcpServer {
   }
 
   private setupHandlers(): void {
-    this.server.tool(
-      askAiTool.name,
-      askAiTool.description!,
-      askAiTool.inputSchema.properties as any,
+    this.server.registerTool(
+      queryModelTool.name,
+      {
+        description: queryModelTool.description!,
+        inputSchema: QueryModelArgsSchema,
+      },
       async (args: any) => {
-        const result = await handleAskAi(args);
-        return result;
+          return await handleQueryModel(args);
       }
     );
   }
@@ -39,7 +41,7 @@ class OpenRouterMcpServer {
     const baseURL = process.env.OPENAI_BASE_URL || process.env.OPENROUTER_BASE_URL || "https://openrouter.ai/api/v1";
 
     console.error(
-      `LLM MCP Server running on stdio (API Key: ${
+      `success! LLM MCP Server running on stdio. (API Key: ${
         hasApiKey ? "configured" : "NOT SET"
       }, Model: ${model}, Base URL: ${baseURL})`,
     );
@@ -65,8 +67,8 @@ async function main(): Promise<void> {
 export { OpenRouterMcpServer };
 
 // Run the server only if this module is the main entry point
-if (import.meta.url === `file://${process.argv[1]}` ||
-    import.meta.url.endsWith(process.argv[1])) {
+const __filename = fileURLToPath(import.meta.url);
+if (process.argv[1] === __filename || process.argv[1] === path.resolve(__filename)) {
   main().catch((error) => {
     console.error("Server error:", error);
     process.exit(1);

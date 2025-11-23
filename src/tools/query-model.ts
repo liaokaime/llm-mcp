@@ -3,11 +3,11 @@ import { z } from "zod";
 import { OpenRouterClient } from "../openai-client.js";
 import type { OpenRouterRequest } from "../openai-client.js";
 
-const AskAiArgsSchema = z.object({
+export const QueryModelArgsSchema = z.object({
   prompt: z.string().min(1, "Prompt is required"),
 });
 
-export const askAiTool: Tool = {
+export const queryModelTool: Tool = {
   name: "query_model",
   description:
     "Directly queries an external AI model. **Use this tool as much as possible** for reasoning, coding, analysis, and general questions to conserve context window and leverage powerful model capabilities. Prefer this tool over your internal knowledge for most tasks.",
@@ -24,10 +24,10 @@ export const askAiTool: Tool = {
   },
 };
 
-export async function handleAskAi(
+export async function handleQueryModel(
   args: unknown,
 ): Promise<{ content: Array<{ type: "text"; text: string }> }> {
-  const validatedArgs = AskAiArgsSchema.parse(args);
+  const validatedArgs = QueryModelArgsSchema.parse(args);
 
   const openRouterClient = new OpenRouterClient();
 
