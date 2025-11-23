@@ -5,32 +5,32 @@ code in this repository.
 
 ## Project Overview
 
-This is a Deno-based MCP (Model Context Protocol) server that provides three
-Google Gemini AI tools:
+This is a Node.js-based MCP (Model Context Protocol) server that provides
+AI capabilities, giving access to AI models from any OpenAI-compatible provider (OpenRouter, OpenAI, DeepSeek, etc.) through a unified interface.
 
-1. **ask_gemini** - Text generation using Gemini 2.5 Pro
-2. **gemini_search** - Search with Google grounding using Gemini 2.5 Flash
-3. **url_content** - URL content analysis using Gemini 2.5 Flash
+The project provides one main tool:
+
+1. **query_model** - AI assistant using OpenAI SDK to access various AI models
 
 ## Development Commands
 
-- **Run server in dev mode**: `deno task dev` (with watch mode)
-- **Run server**: `deno task start`
-- **Run tests**: `deno task test`
-- **Run tests with watch**: `deno task test:watch`
-- **Format code**: `deno fmt`
-- **Lint code**: `deno lint`
-- **Cache dependencies**: `deno cache src/server.ts`
+- **Install dependencies**: `npm install`
+- **Build project**: `npm run build`
+- **Run server in dev mode**: `npm run dev` (uses `tsx` watch mode)
+- **Run server**: `npm start` (requires build first)
+- **Lint code**: `npm run lint`
+- **Format code**: `npm run format`
 
 ## Environment Setup
 
-**Required**: Set both `GEMINI_API_KEY` and `GEMINI_MODEL` environment variables
-before running:
+**Required**: Set `OPENAI_API_KEY` environment variable before running.
+Optionally set `OPENAI_MODEL` and `OPENAI_BASE_URL` to specify which model and provider to use.
 
 ```bash
-export GEMINI_API_KEY=your_api_key_here
-export GEMINI_MODEL=gemini-2.5-pro-preview-06-05
-deno task dev
+export OPENAI_API_KEY=your_api_key_here
+export OPENAI_MODEL=openai/gpt-4o-mini  # Optional, defaults to openai/gpt-4o-mini
+export OPENAI_BASE_URL=https://openrouter.ai/api/v1 # Optional, defaults to OpenRouter
+npm run dev
 ```
 
 ## Project Structure
@@ -38,56 +38,27 @@ deno task dev
 ```
 src/
 ├── server.ts              # Main MCP server implementation
-├── gemini-client.ts       # Google Gemini API client wrapper
+├── openai-client.ts       # API client wrapper using OpenAI SDK
 └── tools/
-    ├── ask-gemini.ts      # Text generation tool (Gemini 2.5 Pro)
-    ├── gemini-search.ts   # Search with grounding (Gemini 2.5 Flash)
-    └── url-content.ts     # URL analysis tool (Gemini 2.5 Flash)
-tests/
-├── server_test.ts         # Server integration tests
-├── gemini_client_test.ts  # API client tests
-└── tools/                 # Individual tool tests
+    └── ask-ai.ts          # AI assistant tool
+dist/                      # Compiled JavaScript output
 ```
 
-## Dependencies
+## Architecture
 
-- `@modelcontextprotocol/sdk` - MCP TypeScript SDK
-- `@google/generative-ai` - Google Gemini API client
-- `zod` - Runtime type validation
-- `@std/assert` - Deno testing assertions
-- `@std/testing` - Deno testing utilities
+- **Server**: `src/server.ts` implements the MCP server using `@modelcontextprotocol/sdk`. It handles tool requests and routes them to the appropriate handler.
+- **Client**: `src/openai-client.ts` wraps the OpenAI SDK to communicate with the provider. It handles authentication and request formatting.
+- **Tools**: `src/tools/` contains the implementation of MCP tools. Currently `ask_ai` is the only tool.
 
-## MCP Tools
+## Code Style
 
-### ask_gemini
+- **TypeScript**: Strict mode is enabled. Target ES2022.
+- **Linting**: ESLint with TypeScript support.
+- **Formatting**: Prettier is used for code formatting.
 
-- **Purpose**: High-quality text generation using Gemini 2.5 Pro
-- **Parameters**: `prompt` (required), `temperature` (0-2), `thinking_budget`
-  (128-32768)
+## Migration Context
 
-### gemini_search
-
-- **Purpose**: Current information search using Google grounding
-- **Parameters**: `query` (required), `region` (optional)
-- **Returns**: Response with source links and search suggestions
-
-### url_content
-
-- **Purpose**: Analyze web page content (max 20 URLs)
-- **Parameters**: `urls` (required array), `question` (required),
-  `analysis_type` (optional)
-
-### deepthink
-
-- **Purpose**: Deep reasoning and analysis for complex problems using maximum
-  thinking capacity
-- **Parameters**: `problem` (required), `context` (optional), `approach`
-  (optional)
-- **Features**: Uses maximum thinking budget (32,768 tokens) with balanced
-  temperature (0.7)
-
-## Testing
-
-Tests use Deno's built-in testing framework with `@std/assert`. All tests
-include input validation and error handling scenarios. Run `deno task test` to
-execute all tests.
+This project was migrated from a Google Gemini specific implementation to a generic OpenAI-compatible implementation.
+- It uses the OpenAI SDK to talk to any compatible provider.
+- Environment variables `GEMINI_API_KEY` / `GEMINI_MODEL` are replaced by `OPENAI_API_KEY` / `OPENAI_MODEL` / `OPENAI_BASE_URL`.
+- The package name is now `llm-mcp`.

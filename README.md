@@ -1,244 +1,231 @@
-# Gemini MCP Server
+# LLM MCP Server
 
-A Model Context Protocol (MCP) server that provides Google Gemini AI
-capabilities as tools. Built with Deno and TypeScript.
+提供通用 AI 能力的 Model Context Protocol (MCP) 服务器。它使用 OpenAI SDK 通过统一接口访问任何兼容 OpenAI 的 API（如 OpenRouter, OpenAI, DeepSeek, LocalAI 等）。本项目基于 Node.js 和 TypeScript 构建。
 
-## Features
+## 功能特性
 
-- **ask_gemini**: Unified AI assistant powered by Gemini 3 Pro with built-in
-  Google Search and URL analysis capabilities
+- **query_model**：由任何兼容 OpenAI 的提供商驱动的 AI 助手
+- 使用 OpenAI SDK 确保广泛的兼容性
+- 完整的 TypeScript 支持，包含严格的类型检查
+- 可自定义 Base URL 以支持任何提供商
 
-## Prerequisites
+## 前置要求
 
-- [Deno](https://deno.land/) (v1.40+)
-- Google Gemini API key ([Get one here](https://ai.google.dev/))
+- [Node.js](https://nodejs.org/) (v18.0.0+)
+- npm, pnpm, 或 yarn
+- 你选择的提供商的 API Key
 
-## Installation
+## 安装
 
-### Option 1: Use JSR Package (Recommended)
+### 从源码安装
 
-The easiest way is to use the published JSR package directly in your Claude
-Desktop configuration:
-
-```bash
-# No installation needed! Use jsr:@cong/gemini-mcp directly in your Claude config
-```
-
-### Option 2: From Source
-
-1. Clone this repository:
+1. 克隆此仓库：
 
 ```bash
 git clone <repository-url>
-cd gemini-mcp
+cd llm-mcp
 ```
 
-2. Set your environment variables:
+2. 安装依赖：
 
 ```bash
-export GEMINI_API_KEY=your_api_key_here
-export GEMINI_MODEL=gemini-3-pro-preview
+npm install
+# 或者
+pnpm install
+# 或者
+yarn install
 ```
 
-## Usage
-
-### Start the Server
+3. 构建项目：
 
 ```bash
-# Set your environment variables first
-export GEMINI_API_KEY=your_api_key_here
-export GEMINI_MODEL=gemini-3-pro-preview
-
-# Development mode (with watch)
-deno task dev
-
-# Production mode
-deno task start
+npm run build
 ```
 
-### Testing with MCP Inspector
-
-To test the server with the MCP Inspector, make sure your environment variables
-are set:
+4. 设置环境变量：
 
 ```bash
-# Set environment variables in your shell
-export GEMINI_API_KEY=your_api_key_here
-export GEMINI_MODEL=gemini-3-pro-preview
-
-# Install MCP Inspector if you haven't already
-npm install -g @modelcontextprotocol/inspector
-
-# Run the inspector
-npx @modelcontextprotocol/inspector src/server.ts
+export OPENAI_API_KEY=your_api_key_here
+export OPENAI_MODEL=openai/gpt-4o-mini  # 可选，默认为 openai/gpt-4o-mini
+export OPENAI_BASE_URL=https://openrouter.ai/api/v1 # 可选，默认为 OpenRouter
 ```
 
-**Important**: The environment variables must be set in the same shell where you
-run the MCP Inspector.
+## 使用方法
 
-### Run Tests
+### 启动服务器
 
 ```bash
-# Run all tests
-deno task test
+# 首先设置环境变量
+export OPENAI_API_KEY=your_api_key_here
+export OPENAI_MODEL=openai/gpt-4o-mini  # 可选
+export OPENAI_BASE_URL=https://api.openai.com/v1 # 可选，例如用于官方 OpenAI
 
-# Run tests with watch mode
-deno task test:watch
+# 开发模式（带有监听和热重载）
+npm run dev
+
+# 生产模式（需要先构建）
+npm run build
+npm start
 ```
 
-### Code Quality
+### 代码质量
 
 ```bash
-# Format code
-deno fmt
+# 格式化代码
+npm run format
 
-# Lint code
-deno lint
+# 代码检查
+npm run lint
+
+# 构建 TypeScript
+npm run build
 ```
 
-## MCP Tool
+## MCP 工具
 
-### ask_gemini
+### query_model
 
-The unified AI assistant powered by Gemini 3 Pro with built-in Google Search and
-URL analysis capabilities.
+由你配置的 LLM 提供商驱动的 AI 助手。
 
-**Parameters:**
+**参数：**
 
-- `prompt` (required): Your question or request. Include URLs directly in the
-  text for analysis.
+- `prompt` (必填)：你要发送给 AI 模型的问题或请求。
 
-**Example:**
+**示例：**
 
 ```json
 {
-  "name": "ask_gemini",
+  "name": "query_model",
   "arguments": {
-    "prompt": "What are the latest developments in quantum computing? Please analyze this paper: https://arxiv.org/abs/2301.01234"
+    "prompt": "量子计算的最新进展是什么？"
   }
 }
 ```
 
-**Capabilities:**
+**能力：**
 
-- 🔍 Automatically searches the web for current information
-- 📄 Analyzes URLs mentioned in your prompt text
-- 🧠 Uses Gemini 3 Pro with thinking capabilities, urlContext and googleSearch
-  tools
-- 📚 Provides comprehensive, well-sourced answers with enhanced reasoning
+- 🤖 访问任何兼容 OpenAI 的模型
+- ⚡ 快速可靠的 API
+- 📊 包含 token 计数的使用元数据
+- 🔄 通过环境变量轻松切换模型
 
-## Dependencies
+## 可用模型
 
-- [@modelcontextprotocol/sdk](https://github.com/modelcontextprotocol/typescript-sdk) -
-  MCP TypeScript SDK
-- [@google/generative-ai](https://github.com/google/generative-ai-js) - Google
-  Gemini API client
-- [zod](https://github.com/colinhacks/zod) - Runtime type validation
-- [@std/assert](https://jsr.io/@std/assert) - Deno standard library assertions
+本服务器支持你的后端提供的任何模型。
 
-## Development
+## 开发
 
-This project uses Deno with TypeScript. Key development commands:
+本项目使用 Node.js 和 TypeScript。主要开发命令：
 
-- `deno task dev` - Start development server with watch mode
-- `deno task test` - Run test suite
-- `deno cache src/server.ts` - Cache dependencies
-- `deno fmt` - Format code
-- `deno lint` - Lint code
+- `npm run dev` - 启动带有监听模式的开发服务器 (使用 tsx)
+- `npm run build` - 将 TypeScript 构建为 JavaScript
+- `npm run lint` - 代码检查
+- `npm run format` - 使用 Prettier 格式化代码
 
-## Troubleshooting
+## 故障排除
 
-### Environment Variable Issues
+### 环境变量问题
 
-If you get environment variable errors:
+如果你遇到环境变量错误：
 
-1. **Verify your environment variables are set**:
+1. **验证你的环境变量是否已设置**：
+
    ```bash
-   echo $GEMINI_API_KEY
-   echo $GEMINI_MODEL
+   echo $OPENAI_API_KEY
+   echo $OPENAI_MODEL
+   echo $OPENAI_BASE_URL
    ```
 
-2. **For MCP Inspector testing**, ensure both variables are set in the same
-   terminal:
+2. **对于 MCP Inspector 测试**，确保 API Key 设置在同一个终端中：
+
    ```bash
-   export GEMINI_API_KEY=your_api_key_here
-   export GEMINI_MODEL=gemini-3-pro-preview
-   npx @modelcontextprotocol/inspector src/server.ts
+   export OPENAI_API_KEY=your_api_key_here
+   export OPENAI_MODEL=openai/gpt-4o-mini
+   npx @modelcontextprotocol/inspector npx tsx src/server.ts
    ```
 
-3. **Check the server logs**: When the server starts, it will show
-   `(API Key: configured)` to confirm your key is loaded.
+3. **检查服务器日志**：当服务器启动时，它会显示 `(API Key: configured)` 来确认你的 Key 已加载。
 
-## Support
+## 支持
 
-- [Google Gemini API Documentation](https://ai.google.dev/gemini-api/docs)
 - [Model Context Protocol](https://modelcontextprotocol.io/)
-- [Deno Documentation](https://docs.deno.com/)
 
-## Claude Desktop Configuration
+## Claude Desktop 配置
 
-To use this MCP server with Claude Desktop, add it to your Claude configuration:
+要在 Claude Desktop 中使用此 MCP 服务器，请将其添加到你的 Claude 配置中：
 
-### macOS/Linux/Windows
+### macOS/Linux
 
-Edit your Claude configuration file:
-
-- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+编辑你的 Claude 配置文件：
+`~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) 或
+`~/.config/Claude/claude_desktop_config.json` (Linux)：
 
 ```json
 {
   "mcpServers": {
-    "gemini": {
-      "command": "deno",
-      "args": [
-        "run",
-        "--allow-net",
-        "--allow-env",
-        "jsr:@cong/gemini-mcp"
-      ],
+    "llm": {
+      "command": "node",
+      "args": ["/absolute/path/to/llm-mcp/dist/server.js"],
       "env": {
-        "GEMINI_API_KEY": "your_api_key_here",
-        "GEMINI_MODEL": "gemini-3-pro-preview"
+        "OPENAI_API_KEY": "your_api_key_here",
+        "OPENAI_MODEL": "openai/gpt-4o-mini",
+        "OPENAI_BASE_URL": "https://openrouter.ai/api/v1"
       }
     }
   }
 }
 ```
 
-### Local Development
+### Windows
 
-If you're running from source code:
+编辑你的 Claude 配置文件：
+`%APPDATA%\Claude\claude_desktop_config.json`：
 
 ```json
 {
   "mcpServers": {
-    "gemini": {
-      "command": "deno",
-      "args": [
-        "run",
-        "--allow-net",
-        "--allow-env",
-        "src/server.ts"
-      ],
+    "llm": {
+      "command": "node",
+      "args": ["C:\\path\\to\\llm-mcp\\dist\\server.js"],
       "env": {
-        "GEMINI_API_KEY": "your_api_key_here",
-        "GEMINI_MODEL": "gemini-3-pro-preview"
+        "OPENAI_API_KEY": "your_api_key_here",
+        "OPENAI_MODEL": "openai/gpt-4o-mini",
+        "OPENAI_BASE_URL": "https://openrouter.ai/api/v1"
       }
     }
   }
 }
 ```
 
-## Contributing
+### 本地开发
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run tests: `deno task test`
-5. Format code: `deno fmt`
-6. Submit a pull request
+用于使用 tsx 进行热重载开发：
 
-## License
+```json
+{
+  "mcpServers": {
+    "llm": {
+      "command": "npx",
+      "args": ["tsx", "/absolute/path/to/llm-mcp/src/server.ts"],
+      "env": {
+        "OPENAI_API_KEY": "your_api_key_here",
+        "OPENAI_MODEL": "openai/gpt-4o-mini"
+      }
+    }
+  }
+}
+```
 
-MIT License - see [LICENSE](LICENSE) file for details.
+## 贡献
+
+1. Fork 仓库
+2. 创建特性分支
+3. 提交你的更改
+4. 格式化代码：`npm run format`
+5. 代码检查：`npm run lint`
+6. 构建：`npm run build`
+7. 提交 Pull Request
+
+## 许可证
+
+MIT License - 详见 [LICENSE](LICENSE) 文件。

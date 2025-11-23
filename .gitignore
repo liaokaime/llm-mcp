@@ -1,6 +1,9 @@
-# Deno
+# Deno (legacy)
 deno.lock
 .deno/
+
+# TypeScript
+*.tsbuildinfo
 
 # Environment variables
 .env
